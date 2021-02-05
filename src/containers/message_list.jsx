@@ -2,11 +2,13 @@ import React from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import Message from '../components/message';
-import fetchMessages from '../actions';
+import MessageForm from './message_form';
+import { fetchMessages } from '../actions';
 
 class MessageList extends React.Component {
   constructor(props) {
     super(props);
+    this.currentUsername = props.currentUsername;
     this.selectedChannel = props.selectedChannel;
     this.messageArray = props.messageList.map((message) => {
       return <Message message={message} key={message.created_at} />;
@@ -14,6 +16,14 @@ class MessageList extends React.Component {
   }
   componentWillMount() {
     fetchMessages(this.selectedChannel);
+  }
+
+  componentDidMount() {
+    this.refresher = setInterval(this.fetchMessages, 5000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.refresher);
   }
   render() {
     return (
@@ -34,20 +44,7 @@ class MessageList extends React.Component {
                 <div className="ps-scrollbar-y" tabIndex="0" style={{ top: "0px", height: "2px" }} />
               </div>
             </div>
-            <div className="publisher bt-1 border-light">
-              <img className="avatar avatar-xs" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="..." />
-              <input className="publisher-input" type="text" placeholder="Write something" />
-              <span className="publisher-btn file-group" >
-                <i className="fa fa-paperclip file-browser" />
-                <input type="file" />
-              </span>
-              <a className="publisher-btn" href="#" data-abc="true">
-                <i className="fa fa-smile" />
-              </a>
-              <a className="publisher-btn text-info" href="#" data-abc="true" >
-                <i className="fa fa-paper-plane" />
-              </a>
-            </div>
+            <MessageForm selectedChannel={this.selectedChannel} author={this.currentUsername} />
           </div>
         </div>
       </div>
@@ -59,7 +56,8 @@ class MessageList extends React.Component {
 const mapStateToProps = (state) => {
   return {
     messageList: state.messageList,
-    selectedChannel: state.selectedChannel
+    selectedChannel: state.selectedChannel,
+    currentUsername: state.currentUsername
   };
 };
 
